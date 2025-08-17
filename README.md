@@ -116,3 +116,66 @@ La **ALU32** implementa:
 
 Este diseño es **modular y escalable**, permitiendo futuras extensiones sin reescribir la lógica central.  
 Funciona de manera consistente con el **simulador Nand2Tetris**, respetando las restricciones de hardware y señales de control.
+
+# Preguntas de Pensamiento Crítico sobre la ALU32
+
+## 1. Modularidad: ventajas y desventajas de usar dos ALU16 vs. una ALU32 monolítica
+
+**ALU16 doble (modular):**  
+**Ventajas:**  
+- Reutilización de diseño: Los bloques de 16 bits pueden emplearse en otros proyectos o para construir ALU más grandes.  
+- Facilidad de depuración: Es más fácil aislar errores en módulos más pequeños.  
+- Claridad y mantenimiento: El diseño es más modular y comprensible.  
+
+**Desventajas:**  
+- Latencia por carry: La propagación de carry entre la ALU baja y la alta introduce un retraso adicional.  
+- Overhead de interconexión: Se necesita lógica adicional para unir las salidas y manejar flags entre módulos.  
+
+**ALU32 monolítica:**  
+**Ventajas:**  
+- Menor latencia: No hay retraso de propagación entre bloques.  
+- Integración directa: Todo está en un solo módulo, sin necesidad de unir bloques.  
+
+**Desventajas:**  
+- Difícil de depurar: Errores en un módulo grande son más difíciles de aislar.  
+- Menos reutilizable: No se puede aprovechar en diseños más pequeños sin cambios.  
+- Complejidad de mantenimiento: Cambiar una parte implica revisar todo el módulo.  
+
+---
+
+## 2. Signed vs. unsigned: cambios necesarios para soportar ambos tipos de operaciones
+
+- Para **unsigned**, el overflow se detecta con el carry-out del bit más significativo.  
+- Para **signed**, el overflow se calcula comparando el carry-in y carry-out del bit más significativo (bit 31).  
+- Para soportar ambos tipos, se deben **agregar flags o señales de control** que seleccionen el método de detección de overflow según el tipo de operación.  
+- Las entradas se interpretan de manera diferente: signed usa **complemento a 2**, mientras que unsigned trata todos los bits como valor positivo puro.  
+
+---
+
+## 3. Carry propagation: implementación de un carry-lookahead
+
+- Un **carry-lookahead** permite calcular los carries de manera anticipada usando las señales **propagate** y **generate** de cada bit.  
+- **Ventajas:**  
+  - Reduce la latencia de propagación del carry, mejorando la velocidad de la ALU.  
+- **Desventajas:**  
+  - Mayor complejidad de compuertas, incrementando el uso de hardware y el costo del diseño.  
+
+---
+
+## 4. Optimización: reducir consumo de compuertas lógicas
+
+Técnicas posibles:  
+- **Multiplexores compartidos:** Reutilizar la misma lógica para operaciones distintas en lugar de duplicar circuitos.  
+- **Simplificación de puertas:** Combinar NOT, AND y OR cuando sea posible.  
+- **Propagación condicional:** Solo calcular carry o flags cuando sea estrictamente necesario.  
+- **Uso de buses parciales:** Procesar datos en bloques (16 bits) y unirlos solo al final.  
+
+---
+
+## 5. Escalabilidad: extender a 64 o 128 bits
+
+- Estrategia: **encadenar más ALU16** en lugar de crear una ALU64 o ALU128 monolítica.  
+- Cada bloque de 16 bits calcula sus operaciones locales y el carry se propaga al siguiente bloque.  
+- Flags de zero, negativo y overflow se mantienen mediante **unión jerárquica** de las banderas de cada bloque.  
+- Ventaja: no se reescribe la lógica central, manteniendo modularidad y facilidad de mantenimiento.
+
