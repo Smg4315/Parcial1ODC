@@ -104,6 +104,11 @@ El diseño utiliza **chips de 16 bits** para las partes baja y alta, combinados 
 
 ---
 
+## Restricciones de implementación
+
+- El Hardware simulator de Nand2Tteris no permite la unión de buses (en este caso, unir dos buses de 16 a uno de 32 para dar una salida unificada), Aún así las salidas individaules son consistentes y cumplen con las características de una ALU de 32.
+- En la IDE online, la opción de crear chips complementarios no esta implementada, por lo que se dificulta la implementación de las operaciones y de esta manera del desarrollo general
+
 ## Conclusión
 
 La **ALU32** implementa:
