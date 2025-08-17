@@ -1,0 +1,7 @@
+CHIP MSB16 {
+    IN in[16];
+    OUT msb;
+    PARTS:
+    // msb = bit 15 del bus de entrada
+    And(a=in[15], b=true, out=msb);
+}

@@ -1,0 +1,117 @@
+// Implementación de la Alu de 32 bits (parcial #1)
+
+CHIP ALU32 {
+    IN  
+        x1[16], y1[16], x2[16], y2[16], // 32-bit inputs
+        zx, // zero the x input?
+        nx, // negate the x input?
+        zy, // zero the y input?
+        ny, // negate the y input?
+        f,  // compute (out = x + y) or (out = x & y)?
+        no; // negate the out output?
+    OUT 
+        out[32], // 32-bit output
+        zr,      // if (out == 0) equals 1, else 0
+        ng,      // if (out < 0)  equals 1, else 0
+        ovf;     // Detecta si hay desbordamiento   
+
+    PARTS:
+    
+    // -------------------------
+    // Desarrollo de entrada X
+    // -------------------------
+    // Parte baja
+    Mux16(a=x1, b= false, sel=zx, out=x1z);
+
+    // Negar la entrada 
+    Not16(in=x1z, out=x1n); 
+
+    // Implementamos el Nx1 (negar o no la entrada)
+    Mux16(a=x1z, b=x1n, sel=nx, out=x1out);
+
+    // Parte alta
+    // Mux x2 o entrada igual a 0 (Zx2)
+    Mux16(a=x2, b= false, sel=zx, out=x2z);
+
+    // Negar la entrada 
+    Not16(in=x2z, out=x2n); 
+
+    // Implementamos el Nx2 (negar o no la entrada)
+    Mux16(a=x2z, b=x2n, sel=nx, out=x2out);
+
+    // -------------------------
+    // Desarrollo de entrada Y
+    // -------------------------
+
+    // Parte baja
+    // Mux y1 o entrada igual a 0 (Zy1)
+    Mux16(a=y1, b= false, sel=zy, out=y1z);
+
+    // Negar la entrada 
+    Not16(in=y1z, out=y1n); 
+
+    // Implementamos el Ny1 (negar o no la entrada)
+    Mux16(a=y1z, b=y1n, sel=ny, out=y1out);
+
+    // Parte alta
+    // Mux y2 o entrada igual a 0 (Zy2)
+    Mux16(a=y2, b= false, sel=zy, out=y2z);
+
+    // Negar la entrada 
+    Not16(in=y2z, out=y2n);
+
+    // Implementamos el Ny2 (negar o no la entrada)
+    Mux16(a=y2z, b=y2n, sel=ny, out=y2out);
+
+
+    // -------------------------
+    // Operaciones lógicas (AND)
+    // -------------------------
+
+    // AND de X1 y Y1
+    And16(a=x1out, b=y1out, out=ANDx1y1low);
+    And16(a=x2out, b=y2out, out=ANDx2y2high);
+
+    // -------------------------
+    // Operaciones aritméticas (ADD 32 bits)
+    // -------------------------
+
+    Add16Carry(a=x1out, b=y1out, cin=false, out=ADDlow, cout=carryLow);
+    Add16Carry(a=x2out, b=y2out, cin=carryLow, out=ADDhigh, cout=carryHigh);
+
+    // -------------------------
+    // Elección de la operación (f = 0 -> And f = 1 -> Add )
+    // -------------------------
+
+   Mux16(a=ANDx1y1low,  b=ADDlow,  sel=f, out=selLow);
+   Mux16(a=ANDx2y2high, b=ADDhigh, sel=f, out=selHigh);
+
+   // -------------------------
+   // Posible negación de la salida (no)
+   // ------------------------- 
+
+   Not16(in=selLow, out=selLowN);
+   Not16(in=selHigh, out=selHighN);
+
+   Mux16(a=selLow,  b=selLowN,  sel=no, out=outLow);
+   Mux16(a=selHigh, b=selHighN, sel=no, out=outHigh);
+
+    // Join32(low=outLow, high=outHigh, out=out);
+
+    // ---------------------------
+    // Implementemos las bandera de estado
+    // ---------------------------
+
+    //zr:
+    
+    Or16Way(in=outLow, out=lowOr);
+    Or16Way(in=outHigh, out=highOr);
+    Or(a=lowOr, b=highOr, out=anyBitOne);
+    Not(in=anyBitOne, out=zr);
+
+    // ng:
+    MSB16(in=outHigh, msb=ng);
+
+    // ovf:
+    Or(a=carryHigh, b=carryLow, out=ovf);
+}

@@ -1,0 +1,12 @@
+// Une dos buses de 16 bits en un bus de 32 bits
+CHIP Join32 {
+    IN 
+        low[16], 
+        high[16];
+    OUT 
+        out[32];
+
+    PARTS:
+    Or16(a=low, b=false, out=out[0..15]);
+    Or16(a=high, b=false, out=out[16..31]);
+}
