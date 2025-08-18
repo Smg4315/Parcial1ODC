@@ -184,3 +184,5 @@ Técnicas posibles:
 - Flags de zero, negativo y overflow se mantienen mediante **unión jerárquica** de las banderas de cada bloque.  
 - Ventaja: no se reescribe la lógica central, manteniendo modularidad y facilidad de mantenimiento.
 
+# 📽️ Video
+https://www.youtube.com/watch?v=aFyRhFw0onk
