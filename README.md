@@ -183,6 +183,15 @@ Técnicas posibles:
 - Cada bloque de 16 bits calcula sus operaciones locales y el carry se propaga al siguiente bloque.  
 - Flags de zero, negativo y overflow se mantienen mediante **unión jerárquica** de las banderas de cada bloque.  
 - Ventaja: no se reescribe la lógica central, manteniendo modularidad y facilidad de mantenimiento.
+  
+---
 
-# 📽️ Video
+## Integrantes:
+- Sebastian Salazar Henao.
+- Simon Mazo Gomez.
+- Andres Felipe Velez.
+
+---
+
+## 📽️ Video
 https://www.youtube.com/watch?v=aFyRhFw0onk
